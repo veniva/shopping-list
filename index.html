@@ -2,15 +2,102 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Online shopping list manager">
         <meta name="author" content="Ventsislav Ivanov">
-        <link type="text/css" href="lib/bootstrap-3.3.5-dist/css/bootstrap.min.css" />
-        <link type="text/css" href="lib/bootstrap-3.3.5-dist/css/bootstrap-theme.min.css" />
+        <link type="text/css" href="lib/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link type="text/css" href="lib/bootstrap-3.3.5-dist/css/bootstrap-theme.min.css" rel="stylesheet" />
+        <link type="text/css" href="css/style.css" rel="stylesheet" />
         <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
         <script type="text/javascript" src="lib/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
         <title>My shopping list</title>
     </head>
     <body>
+    <div id="container">
+        <div style="text-align: right; padding-bottom: 5px;">
+            <button id="save_changes" class="btn btn-xs btn-success">save changes</button>
+        </div>
+        <table id="list" class="table table-striped">
+            <thead>
+            <tr>
+                <th style="width:5%">#</th>
+                <th>Item name</th>
+                <th>Market place</th>
+                <th style="width:10%">Qty.</th>
+                <th style="width:8%">done</th>
+                <th style="width:5%">remove</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+        <script type="text/javascript">
+            var $table = $('#list');
 
+            //pre-defined data
+            var initialData = [
+                {
+                    item: 'Carrots',
+                    market: 'Marks & Spencer',
+                    qty: '0.5kg',
+                    done: false
+                },
+                {
+                    item: 'Tomato',
+                    market: 'Morrisons',
+                    qty: '2kg',
+                    done: false
+                },
+                {
+                    item: 'Fish',
+                    market: 'Sainsbury\'s',
+                    qty: '1kg',
+                    done: false
+                }
+            ];
+            var placeholders = {
+                item: 'Item name',
+                market: 'Market place',
+                qty: 'Qty.'
+            };
+
+            //fill in the table with data
+            function listItems(items){
+                items = items ? items : initialData;
+                //add new user
+                var newItem = {
+                    item: '',
+                    market: '',
+                    qty: '',
+                    done: ''
+                };
+                items.push(newItem);
+
+                $tBody = $table.find('tbody');
+                $tBody.empty();
+
+                items.forEach(function(element, index){
+                    var tr = document.createElement('tr');
+
+                    $(tr).append('<td>'+(index+1)+'</td>');//adding the counter
+                    $.each(element, function(prop, value){
+                        if(prop != 'done')
+                            $(tr).append('<td><input class="form-control" name="'+prop+'" value="'+value+'" placeholder="'+placeholders[prop]+'"></td>');
+                        else{
+                            if(typeof element.done == "boolean")//if not "new item"
+                                $(tr).append('<td><input type="checkbox" name="'+prop+'" value="'+value+'"></td>');
+                            else
+                                $(tr).append('<td>&nbsp;</td>');//append to preserve column number
+                        }
+                    });
+                    var removeButton = (element.item) ? '<input type="checkbox" name="remove" />' : '&nbsp;';//add remove button if not "New user"
+                    $(tr).append('<td>'+removeButton+'</td>');
+
+                    $tBody.append(tr);
+                });
+            }
+            listItems();
+        </script>
     </body>
 </html>
