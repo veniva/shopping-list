@@ -11,6 +11,8 @@
         <link type="text/css" href="css/style.css" rel="stylesheet" />
         <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
         <script type="text/javascript" src="lib/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/items-storage.js"></script>
+        <script type="text/javascript" src="js/list-items.js"></script>
         <title>My shopping list</title>
     </head>
     <body>
@@ -30,191 +32,12 @@
         </table>
     </div>
         <script type="text/javascript">
-            var $table = $('#list');
-
-            //region pre-defined data
-            var initialData = [
-                {
-                    id: 'item-'+1,
-                    item: 'Carrots',
-                    market: 'Marks & Spencer',
-                    qty: '0.5kg',
-                    done: false
-                },
-                {
-                    id: 'item-'+2,
-                    item: 'Tomato',
-                    market: 'Morrisons',
-                    qty: '2kg',
-                    done: false
-                },
-                {
-                    id: 'item-'+3,
-                    item: 'Fish',
-                    market: 'Sainsbury\'s',
-                    qty: '1kg',
-                    done: false
-                }
-            ];
-            var placeholders = {
-                item: 'Item name',
-                market: 'Market place',
-                qty: 'Qty.'
-            };
-            //endregion
-            var lastInsertId = 3;
-
-            //fill in the table with data
-            function listItems(items){
-                items = items ? items : [];
-                //add new user
-                var newItem = {
-                    item: '',
-                    market: '',
-                    qty: '',
-                    done: ''
-                };
-                items.push(newItem);
-
-                var $tBody = $table.find('tbody');
-                $tBody.empty();
-
-                items.forEach(function(element, index){
-                    var tr = document.createElement('tr');
-                    var createInput = function(prop, value){
-                        return $('<input class="form-control" name="'+prop+'" value="'+value+'" placeholder="'+placeholders[prop]+'">')[0];
-                    };
-                    $(tr).append('<td>'+(index+1)+'</td>');//adding a counter to display
-                    if(element.id){
-                        $.each(element, function(prop, value){
-                            if(prop != 'id'){
-                                if(prop != 'done'){
-                                    var input = createInput(prop, value);
-                                    input.onkeyup = function(e){
-                                        element[prop] = this.value;
-                                        editItem(element.id, element);
-                                    };
-                                    $(tr).append($(document.createElement('td')).append(input));
-                                }
-                                else{
-                                    var checkbox = $('<input type="checkbox" name="'+prop+'" value="1">')[0];
-                                    checkbox.checked = element.done;
-                                    checkbox.onclick = function(){
-                                        element.done = this.checked;
-                                        editItem(element.id, element);
-                                    };
-                                    $(tr).append($(document.createElement('td')).append(checkbox));
-                                }
-                            }
-                        });
-                        var $icon = $('<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>');
-                        var $button = $('<button type="button" class="btn btn-default"></button>');
-                        $button.click(function(){
-                            removeItem(element.id);
-                            location.reload();
-                        });
-                        $(tr).append($(document.createElement('td')).append($button.append($icon)));
-
-                    }else{
-                        $.each(element, function(prop, value){
-                            if(prop != 'done'){
-                                var input = createInput(prop, value);
-                                input.onkeyup = function(e){
-                                    element[prop] = this.value;
-                                };
-                                $(tr).append($(document.createElement('td')).append(input));
-                            }
-                            else{
-                                var $button = $('<button class="btn btn-success">add item</button>');
-                                $button.click(function(){
-                                    element.id = 'item-'+(++lastInsertId);
-                                    addItem(element.id, element);
-                                    window.location.reload();
-                                });
-                                $(tr).append($('<td colspan="2"></td>').append($button));
-                            }
-                        });
-                    }
-
-                    $tBody.append(tr);
-                });
-            }
-
-            var itemNamesStorageItem = 'items';
-
             //set initial data if nothing else in storage
-            if(getItemNames() == null){
-                if(initialData.length) addItems(initialData);
+            if(itemStorage.getItemNames() == null){
+                if(ListItems.initialData.length) itemStorage.addItems(ListItems.initialData);
             }
-
-            listItems(getItems());
-
-//region -------------- GETTERS / SETTERS -----------------------//
-            function getItemNames(){
-                try{
-                    return JSON.parse(localStorage.getItem(itemNamesStorageItem));
-                }catch(err){
-                    return null;
-                }
-
-            }
-            function getItem(itemName){
-                try{
-                    return JSON.parse(localStorage.getItem(itemName));
-                }catch(err){
-                    return null;
-                }
-            }
-            function addItem(itemName, value){
-                var itemNames = getItemNames();
-                if(itemNames && itemNames.length)
-                    itemNames.push(itemName);
-                else
-                    itemNames = [itemName];
-                localStorage.setItem(itemNamesStorageItem, JSON.stringify(itemNames));
-                localStorage.setItem(itemName, JSON.stringify(value));
-            }
-            function editItem(itemName, value){
-                var item = getItem(itemName);
-                if(item){
-                    localStorage.setItem(itemName, JSON.stringify(value));
-                }
-            }
-            function removeItem(itemName){
-                var item = getItem(itemName);
-                if(item){
-                    //update item names list
-                    var itemNames = getItemNames();
-                    if(itemNames){
-                        var newItemNames = [];
-                        $(itemNames).each(function(){
-                            if(this != itemName){
-                                newItemNames.push(this);
-                            }
-                        });
-                        localStorage.setItem(itemNamesStorageItem, JSON.stringify(newItemNames));
-                    }
-                    //remove item
-                    localStorage.removeItem(itemName);
-                }
-            }
-            function getItems(){
-                var itemsList = getItemNames();
-                var data = [];
-                if(itemsList != null && typeof itemsList == "object"){
-                    $.each(itemsList, function(i, value){
-                        data.push(getItem(value));
-                    });
-                }
-                return data;
-            }
-            function addItems(items){
-                $(items).each(function(){
-                    addItem(this.id, this);
-                });
-            }
-
-//endregion
+            var listItems = new ListItems(document.getElementById('list'));
+            listItems.listItems(itemStorage.getItems());
         </script>
     </body>
 </html>
