@@ -15,9 +15,6 @@
     </head>
     <body>
     <div id="container">
-        <div style="text-align: right; padding-bottom: 5px;">
-            <button id="save_changes" class="btn btn-xs btn-success">save changes</button>
-        </div>
         <table id="list" class="table table-striped">
             <thead>
             <tr>
@@ -35,21 +32,24 @@
         <script type="text/javascript">
             var $table = $('#list');
 
-            //pre-defined data
+            //region pre-defined data
             var initialData = [
                 {
+                    id: 'item-'+1,
                     item: 'Carrots',
                     market: 'Marks & Spencer',
                     qty: '0.5kg',
                     done: false
                 },
                 {
+                    id: 'item-'+2,
                     item: 'Tomato',
                     market: 'Morrisons',
                     qty: '2kg',
                     done: false
                 },
                 {
+                    id: 'item-'+3,
                     item: 'Fish',
                     market: 'Sainsbury\'s',
                     qty: '1kg',
@@ -61,10 +61,12 @@
                 market: 'Market place',
                 qty: 'Qty.'
             };
+            //endregion
+            var lastInsertId = 3;
 
             //fill in the table with data
             function listItems(items){
-                items = items ? items : initialData;
+                items = items ? items : [];
                 //add new user
                 var newItem = {
                     item: '',
@@ -74,30 +76,99 @@
                 };
                 items.push(newItem);
 
-                $tBody = $table.find('tbody');
+                var $tBody = $table.find('tbody');
                 $tBody.empty();
 
                 items.forEach(function(element, index){
                     var tr = document.createElement('tr');
 
-                    $(tr).append('<td>'+(index+1)+'</td>');//adding the counter
+                    $(tr).append('<td>'+(index+1)+'</td>');//adding a counter to display
                     $.each(element, function(prop, value){
-                        if(prop != 'done')
-                            $(tr).append('<td><input class="form-control" name="'+prop+'" value="'+value+'" placeholder="'+placeholders[prop]+'"></td>');
-                        else{
-                            if(typeof element.done == "boolean")//if not "new item"
-                                $(tr).append('<td><input type="checkbox" name="'+prop+'" value="'+value+'"></td>');
-                            else
-                                $(tr).append('<td>&nbsp;</td>');//append to preserve column number
+                        if(prop != 'id'){
+                            if(prop != 'done'){
+                                var input = $('<input class="form-control" name="'+prop+'" value="'+value+'" placeholder="'+placeholders[prop]+'">')[0];
+                                input.onkeyup = function(e){
+                                    element[prop] = this.value;
+                                    editItem(element.id, element);
+                                };
+                                $(tr).append($(document.createElement('td')).append(input));
+                            }
+                            else{
+                                if(typeof element.done == "boolean"){//if not "new item", add the "done" checkbox
+                                    var checkbox = $('<input type="checkbox" name="'+prop+'" value="1">')[0];
+                                    checkbox.checked = element.done;
+                                    $(tr).append($(document.createElement('td')).append(checkbox));
+
+                                }else{
+                                    $(tr).append('<td colspan="2"><button id="add_new" class="btn btn-success">add item</button></td>');
+                                }
+                            }
                         }
                     });
-                    var removeButton = (element.item) ? '<input type="checkbox" name="remove" />' : '&nbsp;';//add remove button if not "New user"
-                    $(tr).append('<td>'+removeButton+'</td>');
+                    if(typeof element.done == "boolean")//if not "new item" add a remove button
+                        $(tr).append('<td><button id="remove-'+element.id+'" type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>');
 
                     $tBody.append(tr);
                 });
             }
-            listItems();
+
+            var itemNamesStorageItem = 'items';
+
+            //set initial data if nothing else in storage
+            if(!getItems().length){
+                if(initialData.length) addItems(initialData);
+            }
+
+            listItems(getItems());
+
+//region -------------- GETTERS / SETTERS -----------------------//
+            function getItemNames(){
+                try{
+                    return JSON.parse(localStorage.getItem(itemNamesStorageItem));
+                }catch(err){
+                    return null;
+                }
+
+            }
+            function getItem(itemName){
+                try{
+                    return JSON.parse(localStorage.getItem(itemName));
+                }catch(err){
+                    return null;
+                }
+            }
+            function addItem(itemName, value){
+                var itemNames = getItemNames();
+                if(itemNames && itemNames.length)
+                    itemNames.push(itemName);
+                else
+                    itemNames = [itemName];
+                localStorage.setItem(itemNamesStorageItem, JSON.stringify(itemNames));
+                localStorage.setItem(itemName, JSON.stringify(value));
+            }
+            function editItem(itemName, value){
+                var item = getItem(itemName);
+                if(item){
+                    localStorage.setItem(itemName, JSON.stringify(value));
+                }
+            }
+            function getItems(){
+                var itemsList = getItemNames();
+                var data = [];
+                if(itemsList != null && typeof itemsList == "object"){
+                    $.each(itemsList, function(i, value){
+                        data.push(getItem(value));
+                    });
+                }
+                return data;
+            }
+            function addItems(items){
+                $(items).each(function(){
+                    addItem(this.id, this);
+                });
+            }
+
+//endregion
         </script>
     </body>
 </html>
