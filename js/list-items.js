@@ -57,7 +57,7 @@ ListItems.prototype.listItems = function(items){
             var $button = $('<button type="button" class="btn btn-default"></button>');
             $button.click(function(){
                 itemStorage.removeItem(element.id);
-                location.reload();
+                that.listItems(itemStorage.getItems());
             });
             $(tr).append($(document.createElement('td')).append($button.append($icon)));
 
@@ -69,7 +69,7 @@ ListItems.prototype.listItems = function(items){
                     element.id = 'item-'+(++lastInsertId);
                     localStorage.setItem('lastInsertId', lastInsertId);
                     itemStorage.addItem(element.id, element);
-                    window.location.reload();
+                    that.listItems(itemStorage.getItems());
                 };
                 if(prop != 'done'){
                     var input = createInput(prop, value);
