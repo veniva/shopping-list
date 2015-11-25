@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" manifest="shopping-list.appcache">
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -23,7 +23,7 @@
                 <th style="width:5%">#</th>
                 <th>Item name</th>
                 <th>Market place</th>
-                <th style="width:10%">Qty.</th>
+                <th style="width:13%">Qty.</th>
                 <th style="width:8%">done</th>
                 <th style="width:5%">remove</th>
             </tr>
@@ -33,11 +33,16 @@
     </div>
         <script type="text/javascript">
             //set initial data if nothing else in storage
-            if(itemStorage.getItemNames() == null){
-                if(ListItems.initialData.length) itemStorage.addItems(ListItems.initialData);
+            if(typeof(Storage) !== "undefined") {
+                if(itemStorage.getItemNames() == null){
+                    if(ListItems.initialData.length) itemStorage.addItems(ListItems.initialData);
+                }
+                var listItems = new ListItems(document.getElementById('list'));
+                listItems.listItems(itemStorage.getItems());
+            } else {
+                alert('Sorry, your browser does not support local storage. Consider upgrading');
             }
-            var listItems = new ListItems(document.getElementById('list'));
-            listItems.listItems(itemStorage.getItems());
+
         </script>
     </body>
 </html>

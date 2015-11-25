@@ -2,7 +2,7 @@ function ListItems(table){
     this.table = table;
 }
 
-ListItems.prototype.lastInsertId = 3;
+ListItems.prototype.initInsertId = 3;
 
 ListItems.placeholders = {
     item: 'Item name',
@@ -12,6 +12,7 @@ ListItems.placeholders = {
 
 ListItems.prototype.listItems = function(items){
     items = items ? items : [];
+    var that = this;
     //add new user
     var newItem = {
         item: '',
@@ -71,9 +72,11 @@ ListItems.prototype.listItems = function(items){
                 }
                 else{
                     var $button = $('<button class="btn btn-success">add item</button>');
-                    var that = this;
                     $button.click(function(){
-                        element.id = 'item-'+(++that.lastInsertId);
+                        var storedInsertId = localStorage.getItem('lastInsertId');
+                        var lastInsertId = storedInsertId ? storedInsertId : that.initInsertId;
+                        element.id = 'item-'+(++lastInsertId);
+                        localStorage.setItem('lastInsertId', lastInsertId);
                         itemStorage.addItem(element.id, element);
                         window.location.reload();
                     });
