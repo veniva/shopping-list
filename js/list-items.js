@@ -63,22 +63,28 @@ ListItems.prototype.listItems = function(items){
 
         }else{
             $.each(element, function(prop, value){
+                var addItem = function(element){
+                    var storedInsertId = localStorage.getItem('lastInsertId');
+                    var lastInsertId = storedInsertId ? storedInsertId : that.initInsertId;
+                    element.id = 'item-'+(++lastInsertId);
+                    localStorage.setItem('lastInsertId', lastInsertId);
+                    itemStorage.addItem(element.id, element);
+                    window.location.reload();
+                };
                 if(prop != 'done'){
                     var input = createInput(prop, value);
                     input.onkeyup = function(e){
                         element[prop] = this.value;
+                        if(e.keyCode == '13'){//if hit "Enter"
+                            addItem(element);
+                        }
                     };
                     $(tr).append($(document.createElement('td')).append(input));
                 }
                 else{
                     var $button = $('<button class="btn btn-success">add item</button>');
                     $button.click(function(){
-                        var storedInsertId = localStorage.getItem('lastInsertId');
-                        var lastInsertId = storedInsertId ? storedInsertId : that.initInsertId;
-                        element.id = 'item-'+(++lastInsertId);
-                        localStorage.setItem('lastInsertId', lastInsertId);
-                        itemStorage.addItem(element.id, element);
-                        window.location.reload();
+                        addItem(element);
                     });
                     $(tr).append($('<td colspan="2"></td>').append($button));
                 }
