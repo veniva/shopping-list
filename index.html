@@ -81,32 +81,60 @@
 
                 items.forEach(function(element, index){
                     var tr = document.createElement('tr');
-
+                    var createInput = function(prop, value){
+                        return $('<input class="form-control" name="'+prop+'" value="'+value+'" placeholder="'+placeholders[prop]+'">')[0];
+                    };
                     $(tr).append('<td>'+(index+1)+'</td>');//adding a counter to display
-                    $.each(element, function(prop, value){
-                        if(prop != 'id'){
+                    if(element.id){
+                        $.each(element, function(prop, value){
+                            if(prop != 'id'){
+                                if(prop != 'done'){
+                                    var input = createInput(prop, value);
+                                    input.onkeyup = function(e){
+                                        element[prop] = this.value;
+                                        editItem(element.id, element);
+                                    };
+                                    $(tr).append($(document.createElement('td')).append(input));
+                                }
+                                else{
+                                    var checkbox = $('<input type="checkbox" name="'+prop+'" value="1">')[0];
+                                    checkbox.checked = element.done;
+                                    checkbox.onclick = function(){
+                                        element.done = this.checked;
+                                        editItem(element.id, element);
+                                    };
+                                    $(tr).append($(document.createElement('td')).append(checkbox));
+                                }
+                            }
+                        });
+                        var $icon = $('<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>');
+                        var $button = $('<button type="button" class="btn btn-default"></button>');
+                        $button.click(function(){
+                            removeItem(element.id);
+                            location.reload();
+                        });
+                        $(tr).append($(document.createElement('td')).append($button.append($icon)));
+
+                    }else{
+                        $.each(element, function(prop, value){
                             if(prop != 'done'){
-                                var input = $('<input class="form-control" name="'+prop+'" value="'+value+'" placeholder="'+placeholders[prop]+'">')[0];
+                                var input = createInput(prop, value);
                                 input.onkeyup = function(e){
                                     element[prop] = this.value;
-                                    editItem(element.id, element);
                                 };
                                 $(tr).append($(document.createElement('td')).append(input));
                             }
                             else{
-                                if(typeof element.done == "boolean"){//if not "new item", add the "done" checkbox
-                                    var checkbox = $('<input type="checkbox" name="'+prop+'" value="1">')[0];
-                                    checkbox.checked = element.done;
-                                    $(tr).append($(document.createElement('td')).append(checkbox));
-
-                                }else{
-                                    $(tr).append('<td colspan="2"><button id="add_new" class="btn btn-success">add item</button></td>');
-                                }
+                                var $button = $('<button class="btn btn-success">add item</button>');
+                                $button.click(function(){
+                                    element.id = 'item-'+(++lastInsertId);
+                                    addItem(element.id, element);
+                                    window.location.reload();
+                                });
+                                $(tr).append($('<td colspan="2"></td>').append($button));
                             }
-                        }
-                    });
-                    if(typeof element.done == "boolean")//if not "new item" add a remove button
-                        $(tr).append('<td><button id="remove-'+element.id+'" type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>');
+                        });
+                    }
 
                     $tBody.append(tr);
                 });
@@ -115,7 +143,7 @@
             var itemNamesStorageItem = 'items';
 
             //set initial data if nothing else in storage
-            if(!getItems().length){
+            if(getItemNames() == null){
                 if(initialData.length) addItems(initialData);
             }
 
@@ -150,6 +178,24 @@
                 var item = getItem(itemName);
                 if(item){
                     localStorage.setItem(itemName, JSON.stringify(value));
+                }
+            }
+            function removeItem(itemName){
+                var item = getItem(itemName);
+                if(item){
+                    //update item names list
+                    var itemNames = getItemNames();
+                    if(itemNames){
+                        var newItemNames = [];
+                        $(itemNames).each(function(){
+                            if(this != itemName){
+                                newItemNames.push(this);
+                            }
+                        });
+                        localStorage.setItem(itemNamesStorageItem, JSON.stringify(newItemNames));
+                    }
+                    //remove item
+                    localStorage.removeItem(itemName);
                 }
             }
             function getItems(){
