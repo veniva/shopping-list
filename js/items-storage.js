@@ -1,3 +1,10 @@
+/**
+ * Responsible for interaction with the localStorage.
+ * There are three types of entries used in the localStorage:
+ * - "items" - holds the unique ID's of the rows rows as a JSON stringified array
+ * - "lastInsertId" the last inserted value to start incrementing from
+ * - the row entries are saved asJSON stringified objects with unique named keys of type "item-n"
+ */
 var itemStorage = {};
 
 itemStorage.itemNamesStorageItem = 'items';
