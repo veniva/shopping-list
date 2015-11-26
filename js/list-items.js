@@ -1,5 +1,10 @@
+/**
+ *
+ * @param table The selector of the table element
+ * @constructor Fills in the table with data and updates it when necessary
+ */
 function ListItems(table){
-    this.table = table;
+    this._table = table;
 }
 
 ListItems.prototype.initInsertId = 3;
@@ -22,7 +27,7 @@ ListItems.prototype.listItems = function(items){
     };
     items.push(newItem);
 
-    var $tBody = $(this.table).find('tbody');
+    var $tBody = $(this._table).find('tbody');
     $tBody.empty();
 
     items.forEach(function(element, index){
