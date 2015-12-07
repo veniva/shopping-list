@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2015-10-26 v1.1
+# 2015-12-07 v1.1
 
 #LIB
 lib/bootstrap-3.3.5-dist/fonts/glyphicons-halflings-regular.eot
@@ -12,9 +12,6 @@ lib/bootstrap-3.3.5-dist/css/bootstrap.css.map
 lib/bootstrap-3.3.5-dist/css/bootstrap.min.css
 lib/bootstrap-3.3.5-dist/css/bootstrap-theme.css.map
 lib/bootstrap-3.3.5-dist/css/bootstrap-theme.min.css
-
-lib/bootstrap-3.3.5-dist/js/bootstrap.min.js
-lib/bootstrap-3.3.5-dist/js/npm.js
 
 lib/jquery-1.11.3.min.js
 #END LIB
