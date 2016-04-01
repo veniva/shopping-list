@@ -22,8 +22,7 @@ ListItems.prototype.listItems = function(items){
     var newItem = {
         item: '',
         market: '',
-        qty: '',
-        done: ''
+        qty: ''
     };
     items.push(newItem);
 
@@ -39,23 +38,12 @@ ListItems.prototype.listItems = function(items){
         if(element.id){
             $.each(element, function(prop, value){
                 if(prop != 'id'){
-                    if(prop != 'done'){
-                        var input = createInput(prop, value);
-                        input.onkeyup = function(e){
-                            element[prop] = this.value;
-                            itemStorage.editItem(element.id, element);
-                        };
-                        $(tr).append($(document.createElement('td')).append(input));
-                    }
-                    else{
-                        var checkbox = $('<input type="checkbox" name="'+prop+'" value="1">')[0];
-                        checkbox.checked = element.done;
-                        checkbox.onclick = function(){
-                            element.done = this.checked;
-                            itemStorage.editItem(element.id, element);
-                        };
-                        $(tr).append($(document.createElement('td')).append(checkbox));
-                    }
+                    var input = createInput(prop, value);
+                    input.onkeyup = function(e){
+                        element[prop] = this.value;
+                        itemStorage.editItem(element.id, element);
+                    };
+                    $(tr).append($(document.createElement('td')).append(input));
                 }
             });
             var $icon = $('<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>');
@@ -66,34 +54,34 @@ ListItems.prototype.listItems = function(items){
             });
             $(tr).append($(document.createElement('td')).append($button.append($icon)));
 
-        }else{
+        }
+        //new item
+        else{
+            var addItem = function(element){
+                var storedInsertId = localStorage.getItem('lastInsertId');
+                var lastInsertId = storedInsertId ? storedInsertId : that.initInsertId;
+                element.id = 'item-'+(++lastInsertId);
+                localStorage.setItem('lastInsertId', lastInsertId);
+                itemStorage.addItem(element.id, element);
+                that.listItems(itemStorage.getItems());
+            };
+
             $.each(element, function(prop, value){
-                var addItem = function(element){
-                    var storedInsertId = localStorage.getItem('lastInsertId');
-                    var lastInsertId = storedInsertId ? storedInsertId : that.initInsertId;
-                    element.id = 'item-'+(++lastInsertId);
-                    localStorage.setItem('lastInsertId', lastInsertId);
-                    itemStorage.addItem(element.id, element);
-                    that.listItems(itemStorage.getItems());
-                };
-                if(prop != 'done'){
-                    var input = createInput(prop, value);
-                    input.onkeyup = function(e){
-                        element[prop] = this.value;
-                        if(e.keyCode == '13'){//if hit "Enter"
-                            addItem(element);
-                        }
-                    };
-                    $(tr).append($(document.createElement('td')).append(input));
-                }
-                else{
-                    var $button = $('<button class="btn btn-success">add item</button>');
-                    $button.click(function(){
+
+                var input = createInput(prop, value);
+                input.onkeyup = function(e){
+                    element[prop] = this.value;
+                    if(e.keyCode == '13'){//if hit "Enter"
                         addItem(element);
-                    });
-                    $(tr).append($('<td colspan="2"></td>').append($button));
-                }
+                    }
+                };
+                $(tr).append($(document.createElement('td')).append(input));
             });
+            var $button = $('<button class="btn btn-success">add item</button>');
+            $button.click(function(){
+                addItem(element);
+            });
+            $(tr).append($('<td colspan="2"></td>').append($button));
         }
 
         $tBody.append(tr);
@@ -105,22 +93,19 @@ ListItems.initialData = [
         id: 'item-'+1,
         item: 'Carrots',
         market: 'Marks & Spencer',
-        qty: '0.5kg',
-        done: false
+        qty: '0.5kg'
     },
     {
         id: 'item-'+2,
         item: 'Tomato',
         market: 'Morrisons',
-        qty: '2kg',
-        done: false
+        qty: '2kg'
     },
     {
         id: 'item-'+3,
         item: 'Fish',
         market: 'Sainsbury\'s',
-        qty: '1kg',
-        done: false
+        qty: '1kg'
     }
 ];
 
